@@ -4,7 +4,6 @@ var express = require('express');
 var parser = require('./parser');
 
 var app = express();
-app.use(express.bodyParser());
 app.use(express.static( __dirname + '\\static'));
 
 var paths = ['/$', '/css/.*$', '/images/.*$', '/js/.*$']
@@ -26,11 +25,11 @@ function load_file(my_path, res) {
 }
 
 app.get('/timetable', function(req, res) {
-	var _class = req.query.class || 3;
+	var _class = req.query.class || 4;
 	res.end( JSON.stringify( parser.getCourses(_class)) );
 });
 app.get('/*', function(req, res) {
-	var _class = req.query.class || 3;
+	var _class = req.query.class || 4;
 	load_file(req.path, res);
 });
 

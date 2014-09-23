@@ -4,7 +4,7 @@ var courses;
 
 $(document).ready(function() {
 	getClasses();
-	changeClass(3);
+	changeClass(4);
 });
 
 $( document ).on( "pagecreate", "#demo-page", function() {

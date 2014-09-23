@@ -2,11 +2,9 @@ var jsdom = require('jsdom');
 var startWeek;
 var startDate;
 var allCourses = [];
+var allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
 module.exports = {
-  test: function () {
-    console.log('test');
-  },
   update: function () {
     updateTimetable();
   },
@@ -18,8 +16,8 @@ module.exports = {
     // Some ugly preprocessing
     var t50Min = 50 * 60 * 1000;
     var t9Hour = 9 * 60 * 60 * 1000;
-    var t32Hour = 30 * 60 * 60 * 1000;
-    var hasNext = false, hasTomorrow = false;    
+    var t36Hour = 36 * 60 * 60 * 1000;
+    var hasNext = false, hasTomorrow = false, hasFuture = false;
 
     for (var i in courses) {
       var dif = courses[i].timestamp - now;
@@ -29,16 +27,14 @@ module.exports = {
         courses[i].cap = 'Now';
       else if(!hasNext && dif < t9Hour)
         courses[i].cap = 'Next', hasNext = true;
-      else if(!hasTomorrow && dif > t9Hour)
+      else if(!hasTomorrow && dif > t9Hour && dif < t36Hour)
         courses[i].cap = 'Tomorrow', hasTomorrow = true;
-      else
-        courses[i].cap = null;      
+      else if (!hasFuture)
+      	courses[i].cap = 'On ' + allDays[courses[i].day], hasFuture = true;
 
-      if (dif > t32Hour)
+      if (dif > t36Hour && results.length > 4)
         break;
       results.push(courses[i]);
-      //if (hasTomorrow)
-      //  break;
     }
 
     return results;
@@ -63,8 +59,10 @@ function parseExtra(str) {
 	var weeks = str.match(new RegExp('([0-9]+-[0-9]+)'), 'g');
 	var room = str.match(new RegExp('[0-9][0-9][0-9]'), 'g');
 	if (!room) room = '0'; else room = room[0];
-	var start = weeks[0].split('-')[0];
-	var end = weeks[0].split('-')[1];
+	if (weeks != null && weeks.length > 0) {
+		var start = weeks[0].split('-')[0];
+		var end = weeks[0].split('-')[1];
+	}
 	lecturers = lecturers.join(',');
 
 	return [type, lecturers, start, end, room];
@@ -84,7 +82,7 @@ function cntToHour(cnt) {
 } 
 
 function parseTdata(courses, html, cnt, day) {
-	html = html.replace(new RegExp('<br.[^>]+>', 'g'), '\n');
+	html = html.replace(new RegExp('<br>', 'g'), '\n');
 	html = html.replace(new RegExp('<[a-z]+.[^>]+>', 'g'), '');
 	html = html.replace(new RegExp('</[a-z]+.[^>]+>', 'g'), '');
 	
@@ -101,8 +99,15 @@ function parseTdata(courses, html, cnt, day) {
 			continue;
 		}
 
-		var extras = parseExtra(items[i + 1]);
 		var name = items[i];
+		++i;
+		while (i < items.length && items[i].length <= 1) {
+			++i;
+		}
+		if (i == items.length) {
+			break;
+		}
+		var extras = parseExtra(items[i]);
 
 		for (var week = parseInt(extras[2]); week <= parseInt(extras[3]); ++week) {
 			var stdate = weekToDate(week, day, cnt, 0);
@@ -113,6 +118,7 @@ function parseTdata(courses, html, cnt, day) {
 			course.name = name;
 			course.startDate = stdate;
 			course.timestamp = parseInt(stdate.getTime());
+			course.day = day
 			course.endDate = weekToDate(week, day, cnt, 50);
 			course.start = cntToHour(cnt)[0];
 			course.end = cntToHour(cnt)[1];
@@ -123,7 +129,6 @@ function parseTdata(courses, html, cnt, day) {
 		}
 
 		lastCourse = name;
-		++i;
 	}	
 }
 
@@ -132,22 +137,26 @@ function parseTimetable(url, courses) {
 	jsdom.env(url,
     	["http://code.jquery.com/jquery.js"],
     	function (errors, html) {
-	    	var $ = html.$;
-	    	var res = parseStartDate($('body').html());
+	    	try {
+	    		var $ = html.$;
+		    	var res = parseStartDate($('body').html());
 
-	    	var cnt = 0;
-	    	var day = -2;
-	    	$('td').each(function() {
-	    		day = (day == 4 ? -1 : day + 1);
-	    		// This way we skip the first column
-	    		if (day >= 0)
-	    			parseTdata(courses, $(this).html(), cnt, day);
-	    		++cnt;
-	    	});
-	    	
-	    	courses.sort(function(a, b) {
-				return parseInt(a.timestamp) - parseInt(b.timestamp);
-			});
+		    	var cnt = 0;
+		    	var day = -2;
+		    	$('td').each(function() {
+		    		day = (day == 4 ? -1 : day + 1);
+		    		// This way we skip the first column
+		    		if (day >= 0)
+		    			parseTdata(courses, $(this).html(), cnt, day);
+		    		++cnt;
+		    	});
+		    	
+		    	courses.sort(function(a, b) {
+					return parseInt(a.timestamp) - parseInt(b.timestamp);
+				});
+			} catch(err) {
+				console.log("Failed to parse", url, " got:", err)
+			}
 		}	
 	);
 }
@@ -185,6 +194,6 @@ classes[19] = "MSc Computing";
 classes[13] = "MSc Computing Science";
 
 var urls = [];
-urls[0] = 'http://www.doc.ic.ac.uk/internal/timetables/2013-14/spring/class/';
+urls[0] = 'http://www.doc.ic.ac.uk/internal/timetables/2014-15/autumn/class/';
 for (id in classes)
-	urls[id] = urls[0] + id + '_2_10.htm';
+	urls[id] = urls[0] + id + '_1_1.htm';
