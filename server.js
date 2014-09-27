@@ -3,6 +3,7 @@ var filesys = require('fs');
 var express = require('express');
 var parser = require('./parser');
 
+var defaultClass = 4
 var app = express();
 app.use(express.static( __dirname + '\\static'));
 
@@ -25,11 +26,11 @@ function load_file(my_path, res) {
 }
 
 app.get('/timetable', function(req, res) {
-	var _class = req.query.class || 4;
+	var _class = req.query.class || defaultClass;
 	res.end( JSON.stringify( parser.getCourses(_class)) );
 });
 app.get('/*', function(req, res) {
-	var _class = req.query.class || 4;
+	var _class = req.query.class || defaultClass;
 	load_file(req.path, res);
 });
 

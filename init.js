@@ -1,10 +1,10 @@
 var icons = {'LEC': 'lec3.png', 'TUT': 'tut.jpg', 'LAB': 'lab2.png', '?': 'info.png'};
-var _class, deleted = 0, classId = 0, nextId = 0, nextClass = 0;
+var _class, deleted = 0, classId = 0, nextId = 0, nextClass = 0, defaultClass = 4;
 var courses;
 
 $(document).ready(function() {
 	getClasses();
-	changeClass(4);
+	changeClass(defaultClass);
 });
 
 $( document ).on( "pagecreate", "#demo-page", function() {

@@ -37,6 +37,7 @@ module.exports = {
       results.push(courses[i]);
     }
 
+    console.log("[getCourses", _class, results)
     return results;
   }
 };
@@ -83,14 +84,14 @@ function cntToHour(cnt) {
 
 function parseTdata(courses, html, cnt, day) {
 	html = html.replace(new RegExp('<br>', 'g'), '\n');
+	html = html.replace(new RegExp('<br />', 'g'), '\n');
 	html = html.replace(new RegExp('<[a-z]+.[^>]+>', 'g'), '');
 	html = html.replace(new RegExp('</[a-z]+.[^>]+>', 'g'), '');
-	
-	//console.log('#parseTdata', html, cnt, day);
 
 	var lastCourse = "";
-	//var hour = startDate
 	var items = html.split('\n');
+	//console.log('#parseHtml', html, '\nitems\n', items);
+
 	for (var i = 0; i < items.length; ++i) {
 		if (items[i].length <= 1)
 			continue;
@@ -107,6 +108,7 @@ function parseTdata(courses, html, cnt, day) {
 		if (i == items.length) {
 			break;
 		}
+
 		var extras = parseExtra(items[i]);
 
 		for (var week = parseInt(extras[2]); week <= parseInt(extras[3]); ++week) {
@@ -139,11 +141,12 @@ function parseTimetable(url, courses) {
     	function (errors, html) {
 	    	try {
 	    		var $ = html.$;
-		    	var res = parseStartDate($('body').html());
+		    	parseStartDate($('body').html());
 
 		    	var cnt = 0;
 		    	var day = -2;
 		    	$('td').each(function() {
+
 		    		day = (day == 4 ? -1 : day + 1);
 		    		// This way we skip the first column
 		    		if (day >= 0)
