@@ -56,8 +56,8 @@ function getRemaining(timestamp) {
 	if (rem < 0)
 		return {'when': 'Running', 'progress': progress};
 	if (rem < 3600000)
-		return {'when': Math.round(rem / 60000)  + ' minutes'};
-	return {'when': Math.round(rem / 3600000) + ' hours'};
+		return {'when': 'in ' + Math.round(rem / 60000)  + ' minutes'};
+	return {'when': 'in ' + Math.round(rem / 3600000) + ' hours'};
 }
 
 function addCourse(course) {

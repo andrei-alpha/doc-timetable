@@ -10,29 +10,34 @@ module.exports = {
   },
   getCourses: function (_class) {
   	var now = new Date().getTime();
+    var day = new Date().getDay();
     var results = [];
     var courses = allCourses[_class];
 
     // Some ugly preprocessing
     var t50Min = 50 * 60 * 1000;
     var t9Hour = 9 * 60 * 60 * 1000;
-    var t36Hour = 36 * 60 * 60 * 1000;
+    var t47Hour = 47 * 60 * 60 * 1000;
     var hasNext = false, hasTomorrow = false, hasFuture = false;
 
     for (var i in courses) {
       var dif = courses[i].timestamp - now;
+      var courseDate = new Date(courses[i].timestamp);
+      var courseDay = courseDate.getDay();
       if (dif < -t50Min)
         continue;
       if (dif >= -t50Min && dif < 0)
         courses[i].cap = 'Now';
-      else if(!hasNext && dif < t9Hour)
+      else if(!hasNext && courseDay == day)
         courses[i].cap = 'Next', hasNext = true;
-      else if(!hasTomorrow && dif > t9Hour && dif < t36Hour)
-        courses[i].cap = 'Tomorrow', hasTomorrow = true;
+      else if (courseDay == day + 1 || (courseDay == 1)) {
+        if(!hasTomorrow)
+          courses[i].cap = 'Tomorrow', hasTomorrow = true;
+      }
       else if (!hasFuture)
       	courses[i].cap = 'On ' + allDays[courses[i].day], hasFuture = true;
 
-      if (dif > t36Hour && results.length > 4)
+      if (dif > t47Hour && results.length > 4)
         break;
       results.push(courses[i]);
     }
@@ -197,6 +202,6 @@ classes[19] = "MSc Computing";
 classes[13] = "MSc Computing Science";
 
 var urls = [];
-urls[0] = 'http://www.doc.ic.ac.uk/internal/timetables/2014-15/autumn/class/';
+urls[0] = 'http://www.doc.ic.ac.uk/internal/timetables/2014-15/spring/class/';
 for (id in classes)
-	urls[id] = urls[0] + id + '_1_1.htm';
+	urls[id] = urls[0] + id + '_2_10.htm';
