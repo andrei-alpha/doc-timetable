@@ -1,0 +1,24 @@
+{
+  "name": "node-timetable",
+  "version": "1.0.1",
+  "description": "Mobile timetable for DOC",
+  "main": "node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.0.x",
+    "jsdom": "0.8.x"
+  },
+  "keywords": [
+    "doc",
+    "timetable",
+    "mobile"
+  ],
+  "author": "Andrei Antonescu",
+  "license": "MIT",
+  "engines": {
+    "node": "0.10.x"
+  }
+}
